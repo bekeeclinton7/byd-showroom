@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon %}
+{% block title %}Page not found | BYD Canada{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="empty" data-load>
+      <span class="empty__icon">{{ icon('route', cls='icon--xl') }}</span>
+      <h1 class="h2-size">This road doesn't go anywhere</h1>
+      <p>The page you're looking for has moved or never existed.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="{{ url_for('showroom') }}">Go to the showroom {{ icon('arrow-right', cls='icon-arrow') }}</a>
+        <a class="btn btn--outline" href="{{ url_for('home') }}">Home</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

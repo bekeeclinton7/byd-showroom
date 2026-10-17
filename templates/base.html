@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BYD Canada Virtual Showroom{% endblock %}</title>
+  <meta name="description" content="{% block description %}Explore the BYD lineup for Canada. Configure your electric vehicle and reserve it with a fully refundable deposit.{% endblock %}">
+  <meta name="theme-color" content="#0b0c0e">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/brand/favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='images/brand/favicon-64.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/brand/apple-touch-icon.png') }}">
+  <link rel="preload" href="{{ url_for('static', filename='fonts/inter-latin-var.woff2') }}" as="font" type="font/woff2" crossorigin>
+  {# Apply the saved / preferred theme before first paint to avoid a flash #}
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("byd-theme");
+        if (!t) t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+      // Enable entrance animations; if the JS bundle fails to boot, reveal everything.
+      document.documentElement.classList.add("js-motion");
+      setTimeout(function () {
+        if (!window.__bydBooted) document.documentElement.classList.remove("js-motion");
+      }, 3000);
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}?v={{ asset_v }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v={{ asset_v }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}?v={{ asset_v }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}?v={{ asset_v }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/motion.css') }}?v={{ asset_v }}">
+  {% block head %}{% endblock %}
+</head>
+{% from "macros.html" import icon %}
+<body data-page="{{ page }}">
+  {{ icon_sprite }}
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" id="site-header">
+    <div class="container site-header__inner">
+      <button class="icon-btn menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav" data-menu-toggle>
+        {{ icon('menu') }}
+      </button>
+
+      <a class="logo" href="{{ url_for('home') }}" aria-label="BYD Canada home">
+        <img class="logo__img" src="{{ url_for('static', filename='images/brand/byd-logo.png') }}?v={{ asset_v }}" alt="" width="320" height="192">
+        <span class="logo__sub">Canada</span>
+      </a>
+
+      <nav class="nav" id="site-nav" aria-label="Primary">
+        <a class="nav__link" href="{{ url_for('home') }}" {% if page == 'home' %}aria-current="page"{% endif %}>Home</a>
+        <a class="nav__link" href="{{ url_for('showroom') }}" {% if page in ('showroom', 'vehicle') %}aria-current="page"{% endif %}>Showroom</a>
+        <a class="nav__link" href="{{ url_for('compare') }}" {% if page == 'compare' %}aria-current="page"{% endif %}>Compare</a>
+        <a class="nav__link" href="{{ url_for('cart_page') }}" {% if page in ('cart', 'confirmation') %}aria-current="page"{% endif %}>Pre-Order</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-btn theme-toggle" type="button" aria-label="Switch colour theme" data-theme-toggle>
+          {{ icon('moon', cls='icon-moon') }}
+          {{ icon('sun', cls='icon-sun') }}
+        </button>
+        <button class="icon-btn" type="button" aria-label="Open pre-order cart" aria-controls="cart-drawer" aria-expanded="false" data-cart-open>
+          {{ icon('bag') }}
+          <span class="cart-count" data-cart-count aria-live="polite">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="{{ url_for('home') }}" aria-label="BYD Canada home">
+            <img class="logo__img" src="{{ url_for('static', filename='images/brand/byd-logo.png') }}?v={{ asset_v }}" alt="" width="320" height="192" loading="lazy">
+            <span class="logo__sub">Canada</span>
+          </a>
+          <p>Build Your Dreams. Electric vehicles engineered around the Blade Battery, coming to Canadian roads.</p>
+          <div class="socials">
+            <a href="https://www.instagram.com/byd.europe/" target="_blank" rel="noopener" aria-label="BYD on Instagram">{{ icon('instagram', cls='icon--sm') }}</a>
+            <a href="https://www.youtube.com/bydeurope" target="_blank" rel="noopener" aria-label="BYD on YouTube">{{ icon('youtube', cls='icon--sm') }}</a>
+            <a href="https://www.linkedin.com/company/bydeurope" target="_blank" rel="noopener" aria-label="BYD on LinkedIn">{{ icon('linkedin', cls='icon--sm') }}</a>
+            <a href="https://twitter.com/BYD_Europe" target="_blank" rel="noopener" aria-label="BYD on X">{{ icon('x-social', cls='icon--sm') }}</a>
+            <a href="https://www.facebook.com/bydauto.eu" target="_blank" rel="noopener" aria-label="BYD on Facebook">{{ icon('facebook', cls='icon--sm') }}</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h2>Vehicles</h2>
+          <ul>
+            {% for nv in nav_vehicles %}
+            <li><a href="{{ url_for('vehicle', vid=nv.id) }}">{{ nv.full_name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>Shop</h2>
+          <ul>
+            <li><a href="{{ url_for('showroom') }}">Showroom</a></li>
+            <li><a href="{{ url_for('compare') }}">Compare models</a></li>
+            <li><a href="{{ url_for('cart_page') }}">Your pre-order</a></li>
+            <li><a href="{{ url_for('home') }}#how-it-works">How pre-orders work</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>Company</h2>
+          <ul>
+            <li><a href="https://www.byd.com/eu" target="_blank" rel="noopener">BYD Global</a></li>
+            <li><a href="https://media.byd.com/eu?lang=eng" target="_blank" rel="noopener">Newsroom</a></li>
+            <li><a href="{{ url_for('home') }}#why-byd">Why BYD</a></li>
+            <li><a href="{{ url_for('home') }}#faq">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="footer-disclaimer">Demonstration showroom. Prices are estimated Canadian MSRPs in CAD before freight, PDI, fees and incentives, and may change. Range figures are WLTP and vary with temperature, driving style and conditions. Vehicle photography courtesy of BYD Auto; colour simulations and material previews are labelled where used.</p>
+      <div class="footer-legal">
+        <span>&copy; {{ current_year }} BYD Canada. All rights reserved.</span>
+        <ul>
+          <li><a href="{{ url_for('home') }}#faq">Privacy</a></li>
+          <li><a href="{{ url_for('home') }}#faq">Terms of pre-order</a></li>
+          <li><a href="{{ url_for('home') }}#faq">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  {# ---------- Global cart drawer ---------- #}
+  <div class="backdrop" data-backdrop></div>
+  <aside class="drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" aria-hidden="true">
+    <div class="drawer__head">
+      <h2 id="cart-drawer-title">Your pre-order</h2>
+      <button class="icon-btn" type="button" aria-label="Close cart" data-cart-close>{{ icon('x') }}</button>
+    </div>
+    <div class="drawer__body" data-drawer-body>
+      <div class="skeleton skeleton--line h-24"></div>
+    </div>
+    <div class="drawer__foot" data-drawer-foot hidden>
+      <dl class="summary">
+        <div class="summary__row"><dt>Estimated MSRP</dt><dd data-drawer-subtotal>$0</dd></div>
+        <div class="summary__row summary__row--saving"><dt>Pre-order savings</dt><dd data-drawer-savings>$0</dd></div>
+        <div class="summary__row summary__row--due"><dt>Refundable deposit due today</dt><dd data-drawer-due>$0</dd></div>
+      </dl>
+      <a class="btn btn--primary btn--block" href="{{ url_for('cart_page') }}">Review &amp; checkout {{ icon('arrow-right', cls='icon-arrow') }}</a>
+    </div>
+  </aside>
+
+  <div class="toast-region" aria-live="polite" aria-atomic="false" data-toasts></div>
+
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}?v={{ asset_v }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

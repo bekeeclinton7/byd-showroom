@@ -1,0 +1,5 @@
+flask>=3.0
+requests>=2.31
+pillow>=10.0
+google-auth>=2.23   # Google Sheets API option (service account)
+tzdata>=2024.1      # time-zone data for the "Date & Time" column on any OS

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon %}
+{% block title %}Pre-order confirmed — {{ order.ref }} | BYD Canada{% endblock %}
+
+{% block content %}
+<section class="section confirm">
+  <div class="container confirm__inner">
+    <div class="confirm__hero" data-load>
+      <span class="confirm__check">{{ icon('check', cls='icon--xl') }}</span>
+      <p class="eyebrow">Pre-order confirmed</p>
+      <h1>Thank you, {{ order.customer.name.split(' ')[0] }}.</h1>
+      <p class="lead">Your reservation is in. We've sent a confirmation to <strong>{{ order.customer.email }}</strong>.</p>
+      <div class="confirm__ref">
+        <span class="subtle">Order reference</span>
+        <strong class="tabular" data-ref>{{ order.ref }}</strong>
+        <button class="btn btn--ghost btn--sm" type="button" data-copy="{{ order.ref }}" aria-label="Copy order reference {{ order.ref }}">Copy</button>
+      </div>
+    </div>
+
+    <div class="confirm__grid">
+      <section class="card checkout-card" aria-labelledby="c-items" data-reveal>
+        <h2 id="c-items" class="checkout-card__title">{{ icon('car') }} Reserved vehicles</h2>
+        <ul class="line-items line-items--static">
+          {% for it in order['items'] %}
+          <li class="line-item">
+            <div class="line-item__img"><img src="{{ it.image }}" alt="{{ it.name }} in {{ it.colour }}{% if it.colour_simulated %} (colour simulation){% endif %}" loading="lazy"{% if it.colour_simulated %} data-simulate-hex="{{ it.colour_hex }}"{% endif %}></div>
+            <div class="line-item__info">
+              <h3>{{ it.name }} <span class="subtle">&times; {{ it.qty }}</span></h3>
+              <p>{{ it.trim }} &middot; {{ it.colour }}{% if it.colour_simulated %} (simulated){% endif %} &middot; {{ it.interior }}</p>
+              <p class="subtle">Estimated delivery {{ it.delivery }}</p>
+            </div>
+            <div class="line-item__price">
+              <strong>{{ it.line_total|cad }}</strong>
+              <span class="subtle">Deposit {{ it.line_deposit|cad }}</span>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <dl class="summary">
+          <div class="summary__row"><dt>Estimated MSRP</dt><dd>{{ order.totals.msrp|cad }}</dd></div>
+          <div class="summary__row summary__row--saving"><dt>Pre-order savings</dt><dd>−{{ order.totals.preorder_savings|cad }}</dd></div>
+          {% if order.totals.promo_savings %}<div class="summary__row summary__row--saving"><dt>Promo {{ order.promo.code if order.promo }}</dt><dd>−{{ order.totals.promo_savings|cad }}</dd></div>{% endif %}
+          {% for t in order.totals.taxes %}<div class="summary__row"><dt>{{ t.label }}</dt><dd>{{ t.amount|cad(true) }}</dd></div>{% endfor %}
+          <div class="summary__row summary__row--total"><dt>Estimated total</dt><dd>{{ order.totals.estimated_total|cad(true) }}</dd></div>
+          <div class="summary__row summary__row--due"><dt>Refundable deposit</dt><dd>{{ order.totals.due_today|cad }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="card checkout-card" aria-labelledby="c-next" data-reveal>
+        <h2 id="c-next" class="checkout-card__title">{{ icon('calendar') }} What happens next</h2>
+        <ol class="timeline">
+          <li class="timeline__item is-done"><span class="timeline__dot">{{ icon('check', cls='icon--sm') }}</span><div><h3>Reservation placed</h3><p>{{ order.created }} &middot; launch pricing locked</p></div></li>
+          <li class="timeline__item"><span class="timeline__dot">2</span><div><h3>Retailer contact</h3><p>{{ order.dealer }} will reach out to confirm your build and answer questions.</p></div></li>
+          <li class="timeline__item"><span class="timeline__dot">3</span><div><h3>Final agreement</h3><p>Choose financing or lease, add a trade-in and sign. Your deposit counts toward the purchase.</p></div></li>
+          <li class="timeline__item"><span class="timeline__dot">4</span><div><h3>Delivery</h3><p>Pick up in {{ order.province_name }} or choose home delivery.</p></div></li>
+        </ol>
+        <div class="confirm__actions">
+          <button class="btn btn--outline" type="button" data-print>{{ icon('printer') }} Print</button>
+          <a class="btn btn--primary" href="{{ url_for('showroom') }}">Back to showroom {{ icon('arrow-right', cls='icon-arrow') }}</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+{% endblock %}

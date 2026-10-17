@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon %}
+{% block title %}Showroom — All BYD models | BYD Canada{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a>{{ icon('chevron-right') }}<span aria-current="page">Showroom</span>
+    </nav>
+    <div class="section-head section-head--flush">
+      <div>
+        <h1 data-load>The BYD lineup</h1>
+        <p class="lead" data-load>Filter by body style, budget, range and seating. Select up to three models to compare side by side.</p>
+      </div>
+      <div class="input-group showroom-search" data-load>
+        {{ icon('search') }}
+        <label class="visually-hidden" for="search">Search models</label>
+        <input class="input" id="search" type="search" placeholder="Search models, e.g. SUV" autocomplete="off" data-filter="q">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight showroom-section">
+  <div class="container showroom">
+    {# ---------- Filters ---------- #}
+    <aside class="filters" id="filters" aria-label="Filters" data-filters>
+      <div class="filters__head">
+        <h2 class="filters__title">{{ icon('sliders') }} Filters</h2>
+        <button class="btn btn--ghost btn--sm" type="button" data-filter-reset>Reset</button>
+        <button class="icon-btn filters__close" type="button" aria-label="Close filters" data-filters-close>{{ icon('x') }}</button>
+      </div>
+
+      <fieldset class="filter-group">
+        <legend>Body type</legend>
+        <div class="chip-group" data-body-chips>
+          {% for b in all_vehicles|map(attribute='body')|unique|sort %}
+          <label class="chip"><input type="checkbox" name="body" value="{{ b }}">{{ b }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="filter-group">
+        <div class="row-between">
+          <label for="max-price" class="filter-label">Max starting price</label>
+          <output for="max-price" class="filter-value tabular" data-out="max_price"></output>
+        </div>
+        <input class="range" id="max-price" type="range" min="25000" max="75000" step="2500" value="75000" data-filter="max_price">
+      </div>
+
+      <div class="filter-group">
+        <div class="row-between">
+          <label for="min-range" class="filter-label">Minimum range</label>
+          <output for="min-range" class="filter-value tabular" data-out="min_range"></output>
+        </div>
+        <input class="range" id="min-range" type="range" min="0" max="550" step="50" value="0" data-filter="min_range">
+      </div>
+
+      <fieldset class="filter-group">
+        <legend>Seating</legend>
+        <div class="chip-group">
+          <label class="chip"><input type="radio" name="seats" value="0" checked>Any</label>
+          <label class="chip"><input type="radio" name="seats" value="5">5+</label>
+          <label class="chip"><input type="radio" name="seats" value="7">7</label>
+        </div>
+      </fieldset>
+
+      <button class="btn btn--dark btn--block filters__apply" type="button" data-filters-close>Show results</button>
+    </aside>
+
+    {# ---------- Results ---------- #}
+    <div class="results">
+      <div class="results__bar">
+        <p class="results__count" aria-live="polite" data-result-count>Loading models…</p>
+        <div class="results__tools">
+          <button class="btn btn--outline btn--sm filters-toggle" type="button" aria-controls="filters" data-filters-open>{{ icon('sliders', cls='icon--sm') }} Filters</button>
+          <label class="visually-hidden" for="sort">Sort by</label>
+          <select class="select select--sm" id="sort" data-filter="sort">
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="range-desc">Range: longest first</option>
+            <option value="power-desc">Power: highest first</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-3" data-results aria-busy="true">
+        {% for _ in range(6) %}
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="skeleton skeleton--media"></div>
+          <div class="skeleton--lines">
+            <div class="skeleton skeleton--line h-24 w-60"></div>
+            <div class="skeleton skeleton--line w-40"></div>
+            <div class="skeleton skeleton--line"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="empty" data-empty hidden>
+        <span class="empty__icon">{{ icon('search', cls='icon--xl') }}</span>
+        <h2>No models match those filters</h2>
+        <p>Try widening your price or range, or clear the search.</p>
+        <button class="btn btn--outline" type="button" data-filter-reset>Reset filters</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------- Compare tray ---------- #}
+<div class="compare-tray" data-compare-tray aria-live="polite">
+  <div class="container compare-tray__inner">
+    <div class="compare-tray__label">{{ icon('compare') }} <span><strong data-compare-count>0</strong> of 3 selected</span></div>
+    <ul class="compare-tray__list" data-compare-list></ul>
+    <div class="compare-tray__actions">
+      <button class="btn btn--ghost btn--sm" type="button" data-compare-clear>Clear</button>
+      <a class="btn btn--primary btn--sm" href="{{ url_for('compare') }}" data-compare-go>Compare {{ icon('arrow-right', cls='icon-arrow icon--sm') }}</a>
+    </div>
+  </div>
+</div>
+<div class="backdrop backdrop--filters" data-filters-backdrop></div>
+{% endblock %}

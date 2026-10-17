@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon %}
+{% block title %}Your pre-order | BYD Canada{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a>{{ icon('chevron-right') }}<span aria-current="page">Pre-Order</span>
+    </nav>
+    <h1 data-load>Your pre-order</h1>
+    <p class="lead" data-load>Review your vehicles, apply a code, and reserve with a fully refundable deposit.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    {# Loading state #}
+    <div class="checkout" data-checkout-loading aria-busy="true">
+      <div class="checkout__main">
+        <div class="skeleton" style="height:180px;border-radius:var(--radius-lg)"></div>
+        <div class="skeleton" style="height:180px;border-radius:var(--radius-lg)"></div>
+      </div>
+      <div class="skeleton" style="height:420px;border-radius:var(--radius-lg)"></div>
+    </div>
+
+    {# Empty state #}
+    <div class="empty card" data-checkout-empty hidden>
+      <span class="empty__icon">{{ icon('bag', cls='icon--xl') }}</span>
+      <h2>Your pre-order is empty</h2>
+      <p>Configure a BYD and add it here to reserve with a refundable deposit from {{ deposit_from|cad }}.</p>
+      <a class="btn btn--primary" href="{{ url_for('showroom') }}">Browse the showroom {{ icon('arrow-right', cls='icon-arrow') }}</a>
+    </div>
+
+    <div class="checkout" data-checkout hidden>
+      <div class="checkout__main">
+        {# ---------- Line items ---------- #}
+        <section class="card checkout-card" aria-labelledby="items-title">
+          <div class="row-between checkout-card__head">
+            <h2 id="items-title" class="checkout-card__title">{{ icon('car') }} Vehicles <span class="badge" data-item-count>0</span></h2>
+            <a class="btn btn--ghost btn--sm" href="{{ url_for('showroom') }}">{{ icon('plus', cls='icon--sm') }} Add another</a>
+          </div>
+          <ul class="line-items" data-line-items></ul>
+          <p class="subtle">{{ icon('info', cls='icon--sm inline-icon') }} Up to 2 of each configuration and 3 vehicles per pre-order.</p>
+        </section>
+
+        {# ---------- Checkout form ---------- #}
+        <section class="card checkout-card" aria-labelledby="details-title">
+          <h2 id="details-title" class="checkout-card__title">{{ icon('mail') }} Your details</h2>
+          <form class="checkout-form" data-checkout-form method="post" action="{{ url_for('api_checkout') }}" novalidate>
+            <div class="form-grid">
+              <div class="field" data-field="name">
+                <label for="f-name">Full name</label>
+                <input class="input" id="f-name" name="name" autocomplete="name" required minlength="2" maxlength="80">
+                <span class="error-text" id="e-name"></span>
+              </div>
+              <div class="field" data-field="email">
+                <label for="f-email">Email</label>
+                <input class="input" id="f-email" name="email" type="email" autocomplete="email" required>
+                <span class="error-text" id="e-email"></span>
+              </div>
+              <div class="field" data-field="phone">
+                <label for="f-phone">Phone <span class="subtle">(optional)</span></label>
+                <input class="input" id="f-phone" name="phone" type="tel" autocomplete="tel">
+                <span class="error-text" id="e-phone"></span>
+              </div>
+              <div class="field" data-field="province">
+                <label for="f-province">Province or territory</label>
+                <select class="select" id="f-province" name="province" required data-province-select>
+                  {% for code, p in market.provinces.items()|sort(attribute='1.name') %}
+                  <option value="{{ code }}">{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+                <span class="error-text" id="e-province"></span>
+              </div>
+              <div class="field field--full" data-field="dealer">
+                <label for="f-dealer">Delivery location</label>
+                <select class="select" id="f-dealer" name="dealer" required data-dealer-select></select>
+                <span class="hint">Planned launch locations. Home delivery is available everywhere.</span>
+                <span class="error-text" id="e-dealer"></span>
+              </div>
+              <div class="field field--full" data-field="consent">
+                <label class="check">
+                  <input type="checkbox" name="consent" required>
+                  <span>I understand my deposit is fully refundable, pricing is an estimate, and BYD Canada may contact me about my pre-order.</span>
+                </label>
+                <span class="error-text" id="e-consent"></span>
+              </div>
+            </div>
+            <div class="notice form-error" data-form-error hidden role="alert">{{ icon('alert') }}<span></span></div>
+            <button class="btn btn--primary btn--lg btn--block" type="submit" data-submit>
+              {{ icon('lock') }} <span>Place refundable pre-order &middot; <span data-submit-due>$0</span></span>
+            </button>
+            <p class="subtle center">{{ icon('shield', cls='icon--sm inline-icon') }} Demonstration checkout. No payment is taken.</p>
+          </form>
+        </section>
+      </div>
+
+      {# ---------- Summary ---------- #}
+      <aside class="checkout__aside">
+        <section class="card checkout-card summary-card" aria-labelledby="summary-title">
+          <h2 id="summary-title" class="checkout-card__title">Order summary</h2>
+
+          <div class="field">
+            <label for="s-province">Estimate taxes for</label>
+            <select class="select" id="s-province" data-summary-province>
+              {% for code, p in market.provinces.items()|sort(attribute='1.name') %}
+              <option value="{{ code }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <form class="promo" data-promo-form novalidate>
+            <label for="promo" class="label">Promo code</label>
+            <div class="promo__row">
+              <input class="input" id="promo" name="promo" placeholder="e.g. BYDLAUNCH" autocomplete="off" spellcheck="false">
+              <button class="btn btn--dark" type="submit">Apply</button>
+            </div>
+            <p class="promo__msg" data-promo-msg role="status"></p>
+          </form>
+
+          <dl class="summary" data-summary>
+            <div class="summary__row"><dt>Estimated MSRP</dt><dd data-t="msrp">$0</dd></div>
+            <div class="summary__row summary__row--saving"><dt>Pre-order savings</dt><dd data-t="preorder_savings">$0</dd></div>
+            <div class="summary__row summary__row--saving" data-promo-row hidden><dt data-promo-label>Promo</dt><dd data-t="promo_savings">$0</dd></div>
+            <div class="summary__row"><dt>Subtotal</dt><dd data-t="subtotal">$0</dd></div>
+            <div data-tax-rows></div>
+            <div class="summary__row summary__row--total"><dt>Estimated total</dt><dd data-t="estimated_total">$0</dd></div>
+            <div class="summary__row summary__row--due"><dt>Due today (refundable deposit)</dt><dd data-t="due_today">$0</dd></div>
+          </dl>
+          <div class="notice">{{ icon('refund') }}<span><strong>Fully refundable.</strong> Your deposit secures your place in the delivery queue and your pre-order discount. The balance is paid at delivery.</span></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script type="application/json" id="market-data">{{ {'dealers': market.dealers}|tojson }}</script>
+{% endblock %}

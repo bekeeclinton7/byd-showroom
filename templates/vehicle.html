@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon, vehicle_card %}
+{% set t0 = v.trims[0] %}
+{% set c0 = v.colours[0] %}
+{% set i0 = v.interiors[0] %}
+{% block title %}{{ v.full_name }} — Configure &amp; pre-order | BYD Canada{% endblock %}
+{% block description %}{{ v.summary }}{% endblock %}
+
+{% block content %}
+{# ---------------- Header ---------------- #}
+<section class="vehicle-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a>{{ icon('chevron-right') }}
+      <a href="{{ url_for('showroom') }}">Showroom</a>{{ icon('chevron-right') }}
+      <span aria-current="page">{{ v.name }}</span>
+    </nav>
+    <div class="vehicle-head__row">
+      <div>
+        <div class="vehicle-head__badges" data-load>
+          <span class="badge {% if v.status == 'Launch lineup' %}badge--soft-red{% endif %}">{{ v.status }}</span>
+          <span class="badge">{{ icon('car') }}{{ v.body }}</span>
+          <span class="badge">{{ icon('users') }}{{ v.seats }} seats</span>
+          <span class="badge">{{ icon('calendar') }}Est. delivery {{ v.delivery }}</span>
+        </div>
+        <h1 data-load>{{ v.full_name }}</h1>
+        <p class="lead" data-load>{{ v.summary }}</p>
+        {% if v.note %}<p class="subtle" data-load>{{ icon('info', cls='icon--sm inline-icon') }} {{ v.note }}</p>{% endif %}
+      </div>
+      <div class="preorder-card" data-load>
+        <div class="preorder-card__top">
+          <span class="badge badge--red">{{ icon('tag') }}Pre-order: save {{ v.preorder.discount|cad }}</span>
+          <span class="subtle">From</span>
+        </div>
+        <p class="preorder-card__price"><s>{{ v.price_from|cad }}</s> <strong>{{ (v.price_from - v.preorder.discount)|cad }}</strong></p>
+        <p class="subtle">Reserve for {{ v.preorder.deposit|cad }}, fully refundable.</p>
+        <div class="countdown countdown--sm" data-countdown="{{ launch_deadline }}" role="timer" aria-label="Time left for launch pricing"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- Viewer + configurator ---------------- #}
+<section class="section section--tight" aria-label="Configure your {{ v.name }}">
+  <div class="container config-layout">
+
+    {# ===== Visual inspection viewer (static/js/viewer.js) ===== #}
+    <div class="viewer" data-viewer>
+      <div class="viewer__toolbar">
+        <div class="segmented" role="tablist" aria-label="Viewer angle" data-view-tabs>
+          <span class="segmented__pill" aria-hidden="true"></span>
+          <button type="button" role="tab" aria-selected="true" data-view="front">{{ icon('car', cls='icon--sm') }}<span>Exterior</span></button>
+          {% if c0.images|length > 1 or c0.source != 'photo' %}
+          <button type="button" role="tab" aria-selected="false" data-view="profile">{{ icon('move', cls='icon--sm') }}<span>Profile</span></button>
+          {% endif %}
+          <button type="button" role="tab" aria-selected="false" data-view="details">{{ icon('image', cls='icon--sm') }}<span>Details</span></button>
+          <button type="button" role="tab" aria-selected="false" data-view="interior">{{ icon('armchair', cls='icon--sm') }}<span>Interior</span></button>
+        </div>
+        <div class="viewer__tools">
+          <button class="icon-btn" type="button" aria-pressed="true" aria-label="Toggle feature hotspots" data-hotspot-toggle title="Hotspots">{{ icon('scan') }}</button>
+          <button class="icon-btn" type="button" aria-label="Open current image full screen" data-viewer-expand title="Full screen">{{ icon('maximize') }}</button>
+        </div>
+      </div>
+
+      <div class="viewer__stage" data-stage tabindex="0" role="group" aria-roledescription="image viewer" aria-label="{{ v.full_name }} photo viewer. Use left and right arrow keys to move between views.">
+        <div class="viewer__frame" data-frame>
+          <img class="viewer__img is-active" data-layer="a" src="{{ c0.images[0] if c0.images else v.card_image }}" alt="{{ v.full_name }} in {{ c0.name }}, front three-quarter view" width="1600" height="818">
+          <img class="viewer__img" data-layer="b" alt="" aria-hidden="true" width="1600" height="818">
+          <div class="hotspots" data-hotspots></div>
+          <div class="material-legend" data-material-legend hidden></div>
+        </div>
+        <span class="viewer__label" data-viewer-label hidden></span>
+        <button class="icon-btn viewer__nav viewer__nav--prev" type="button" aria-label="Previous view" data-viewer-prev>{{ icon('chevron-left') }}</button>
+        <button class="icon-btn viewer__nav viewer__nav--next" type="button" aria-label="Next view" data-viewer-next>{{ icon('chevron-right') }}</button>
+        <span class="viewer__hint" data-viewer-hint>{{ icon('move', cls='icon--sm') }} Drag or swipe to inspect</span>
+        <div class="hotspot-card" data-hotspot-card role="dialog" aria-live="polite" hidden></div>
+      </div>
+
+      <div class="viewer__foot">
+        <ol class="viewer__thumbs" data-thumbs aria-label="Views"></ol>
+        <p class="viewer__credit" data-viewer-credit>Photo: BYD Auto</p>
+      </div>
+    </div>
+
+    {# ===== Configurator (static/js/configurator.js) ===== #}
+    <aside class="configurator" aria-labelledby="config-title">
+      <form class="configurator__form" data-configurator novalidate>
+        <h2 id="config-title" class="visually-hidden">Build your {{ v.name }}</h2>
+
+        <fieldset class="config-step">
+          <legend class="config-step__title"><span class="config-step__num">1</span> Trim</legend>
+          <div class="option-list">
+            {% for t in v.trims %}
+            <label class="option-card">
+              <input type="radio" name="trim" value="{{ t.id }}" {% if loop.first %}checked{% endif %}>
+              <span class="option-card__main">
+                <span class="option-card__title">{{ t.name }}</span>
+                <span class="option-card__meta">{{ t.spec.range_km }} km &middot; {{ t.spec.power_hp }} hp &middot; {{ t.spec.drive }} &middot; {{ t.spec.battery_kwh }} kWh</span>
+              </span>
+              <span class="option-card__price">{{ t.price|cad }}</span>
+              <span class="option-card__check">{{ icon('check') }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <fieldset class="config-step">
+          <legend class="config-step__title"><span class="config-step__num">2</span> Paint</legend>
+          <div class="swatches" role="radiogroup" aria-label="Paint colour" data-swatches>
+            {% for c in v.colours %}
+            <button type="button" class="swatch" role="radio" aria-checked="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}"
+                    aria-label="{{ c.name }}{% if c.price %}, plus {{ c.price|cad }}{% endif %}{% if c.source != 'photo' %}, colour simulation{% endif %}"
+                    data-colour="{{ c.id }}" style="--chip: {{ c.hex }}">
+              <span class="swatch__chip" {% if c.swatch %}style="background-image:url('{{ c.swatch }}')"{% endif %}></span>
+              {% if c.source != 'photo' %}<span class="swatch__tag" title="Colour simulation">{{ icon('palette') }}</span>{% endif %}
+            </button>
+            {% endfor %}
+          </div>
+          <p class="config-step__selection"><strong data-colour-name>{{ c0.name }}</strong> <span class="subtle" data-colour-price>{{ 'Included' if not c0.price else '+' ~ c0.price|cad }}</span></p>
+        </fieldset>
+
+        <fieldset class="config-step">
+          <legend class="config-step__title"><span class="config-step__num">3</span> Interior</legend>
+          <div class="option-list">
+            {% for i in v.interiors %}
+            <label class="option-card">
+              <input type="radio" name="interior" value="{{ i.id }}" {% if loop.first %}checked{% endif %}>
+              <span class="material-dots" aria-hidden="true">
+                {% for m in i.materials %}<span style="background:{{ m.hex }}"></span>{% endfor %}
+              </span>
+              <span class="option-card__main">
+                <span class="option-card__title">{{ i.name }}</span>
+                <span class="option-card__meta">{{ i.materials[0].name }}{% if not i.real %} &middot; material preview{% endif %}</span>
+              </span>
+              <span class="option-card__price">{{ 'Included' if not i.price else '+' ~ i.price|cad }}</span>
+              <span class="option-card__check">{{ icon('check') }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <div class="config-summary" aria-live="polite">
+          <dl class="summary">
+            <div class="summary__row"><dt data-sum-trim-label>{{ t0.name }}</dt><dd data-sum="base">{{ t0.price|cad }}</dd></div>
+            <div class="summary__row"><dt>Paint</dt><dd data-sum="colour">{{ c0.price|cad }}</dd></div>
+            <div class="summary__row"><dt>Interior</dt><dd data-sum="interior">{{ i0.price|cad }}</dd></div>
+            <div class="summary__row summary__row--saving"><dt>Pre-order discount</dt><dd data-sum="discount">−{{ v.preorder.discount|cad }}</dd></div>
+            <div class="summary__row summary__row--total"><dt>Estimated price</dt><dd><span class="price-tick" data-sum="total">{{ (t0.price + c0.price + i0.price - v.preorder.discount)|cad }}</span></dd></div>
+            <div class="summary__row summary__row--due"><dt>Due today (refundable)</dt><dd>{{ v.preorder.deposit|cad }}</dd></div>
+          </dl>
+          <p class="config-verified subtle" data-verified>{{ icon('check-circle', cls='icon--sm') }} Server-verified pricing</p>
+          <button class="btn btn--primary btn--lg btn--block" type="submit" data-add-btn>
+            {{ icon('bag') }} <span>Add to Pre-Order</span>
+          </button>
+          <p class="subtle config-terms">{{ icon('refund', cls='icon--sm inline-icon') }} Cancel any time before delivery for a full refund. Excludes freight, PDI, fees and taxes.</p>
+        </div>
+      </form>
+    </aside>
+  </div>
+</section>
+
+{# ---------------- Key figures ---------------- #}
+<section class="section section--soft" aria-labelledby="specs-title">
+  <div class="container">
+    <div class="key-figures" data-stagger>
+      <div class="key-figure" data-reveal><span class="feature-card__icon">{{ icon('route', cls='icon--lg') }}</span><strong data-spec="range_km">{{ t0.spec.range_km }}</strong><small>km</small><span>WLTP range</span></div>
+      <div class="key-figure" data-reveal><span class="feature-card__icon">{{ icon('zap', cls='icon--lg') }}</span><strong data-spec="power_hp">{{ t0.spec.power_hp }}</strong><small>hp</small><span>Peak power</span></div>
+      <div class="key-figure" data-reveal><span class="feature-card__icon">{{ icon('timer', cls='icon--lg') }}</span><strong data-spec="accel_s">{{ t0.spec.accel_s }}</strong><small>s</small><span>0–100 km/h</span></div>
+      <div class="key-figure" data-reveal><span class="feature-card__icon">{{ icon('plug', cls='icon--lg') }}</span><strong data-spec="dc_kw">{{ t0.spec.dc_kw }}</strong><small>kW</small><span>Peak DC charging</span></div>
+    </div>
+
+    <div class="section-head spec-head" data-reveal>
+      <div>
+        <p class="eyebrow">Technical data</p>
+        <h2 id="specs-title">Specifications</h2>
+      </div>
+      <p>Showing <strong data-spec-trim>{{ t0.name }}</strong>. Specifications update with the trim you select above.</p>
+    </div>
+
+    <div class="spec-sheet" data-reveal>
+      <div class="spec-group">
+        <h3>{{ icon('battery') }} Battery &amp; range</h3>
+        <dl>
+          <div><dt>Battery</dt><dd><span data-spec="battery_kwh">{{ t0.spec.battery_kwh }}</span> kWh Blade (LFP)</dd></div>
+          <div><dt>Range (WLTP)</dt><dd><span data-spec="range_km">{{ t0.spec.range_km }}</span> km</dd></div>
+          <div><dt>Warranty</dt><dd>{{ v.warranty }}</dd></div>
+        </dl>
+      </div>
+      <div class="spec-group">
+        <h3>{{ icon('plug') }} Charging</h3>
+        <dl>
+          <div><dt>DC fast charge (peak)</dt><dd><span data-spec="dc_kw">{{ t0.spec.dc_kw }}</span> kW</dd></div>
+          <div><dt>DC charge time</dt><dd data-spec="dc_time">{{ t0.spec.dc_time }}</dd></div>
+          <div><dt>AC onboard charger</dt><dd><span data-spec="ac_kw">{{ t0.spec.ac_kw }}</span> kW</dd></div>
+        </dl>
+      </div>
+      <div class="spec-group">
+        <h3>{{ icon('gauge') }} Performance</h3>
+        <dl>
+          <div><dt>Power</dt><dd><span data-spec="power_hp">{{ t0.spec.power_hp }}</span> hp (<span data-spec="power_kw">{{ t0.spec.power_kw }}</span> kW)</dd></div>
+          <div><dt>Torque</dt><dd><span data-spec="torque_nm">{{ t0.spec.torque_nm }}</span> Nm</dd></div>
+          <div><dt>0–100 km/h</dt><dd><span data-spec="accel_s">{{ t0.spec.accel_s }}</span> s</dd></div>
+          <div><dt>Top speed</dt><dd><span data-spec="top_speed">{{ t0.spec.top_speed }}</span> km/h</dd></div>
+          <div><dt>Drive</dt><dd data-spec="drive">{{ t0.spec.drive }}</dd></div>
+        </dl>
+      </div>
+      <div class="spec-group">
+        <h3>{{ icon('ruler') }} Dimensions</h3>
+        <dl>
+          <div><dt>Length</dt><dd>{{ "{:,}".format(v.dimensions.length) }} mm</dd></div>
+          <div><dt>Width</dt><dd>{{ "{:,}".format(v.dimensions.width) }} mm</dd></div>
+          <div><dt>Height</dt><dd>{{ "{:,}".format(v.dimensions.height) }} mm</dd></div>
+          <div><dt>Wheelbase</dt><dd>{{ "{:,}".format(v.dimensions.wheelbase) }} mm</dd></div>
+          <div><dt>Cargo</dt><dd>{{ v.cargo_l }} L</dd></div>
+          <div><dt>Seats</dt><dd>{{ v.seats }}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- Gallery ---------------- #}
+<section class="section" aria-labelledby="gallery-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="eyebrow">Gallery</p>
+        <h2 id="gallery-title">Every angle</h2>
+      </div>
+      <p>Official BYD photography. Select any image to view it full screen.</p>
+    </div>
+    <ul class="gallery" data-gallery data-stagger>
+      {% for g in v.gallery %}
+      <li class="gallery__item{% if loop.first %} gallery__item--wide{% endif %}{% if g.fit == 'contain' %} gallery__item--contain{% endif %}" data-reveal>
+        <button type="button" class="gallery__btn" data-lightbox-index="{{ loop.index0 }}" aria-label="Open image: {{ g.caption }}">
+          <img src="{{ g.src }}" alt="{{ v.full_name }}: {{ g.caption }}" loading="lazy" decoding="async">
+          <span class="gallery__caption">{{ g.caption }}</span>
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="subtle gallery__credit">Photography &copy; BYD Auto Co., Ltd. Source: byd.com. See image_sources.md for full attribution.</p>
+  </div>
+</section>
+
+{# ---------------- More models ---------------- #}
+<section class="section section--soft" aria-labelledby="more-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="eyebrow">Keep exploring</p>
+        <h2 id="more-title">More from BYD</h2>
+      </div>
+      <a class="btn btn--outline" href="{{ url_for('compare') }}?ids={{ v.id }},{{ others[0].id }},{{ others[1].id }}">Compare with these {{ icon('compare') }}</a>
+    </div>
+    <div class="grid grid-3" data-stagger>
+      {% for o in others %}{{ vehicle_card(o) }}{% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---------------- Lightbox ---------------- #}
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer" aria-hidden="true" data-lightbox>
+  <div class="lightbox__bar">
+    <span class="subtle tabular" data-lightbox-count></span>
+    <button class="icon-btn" type="button" aria-label="Close image viewer" data-lightbox-close>{{ icon('x') }}</button>
+  </div>
+  <div class="lightbox__stage">
+    <button class="icon-btn lightbox__nav lightbox__nav--prev" type="button" aria-label="Previous image" data-lightbox-prev>{{ icon('chevron-left') }}</button>
+    <img alt="" data-lightbox-img>
+    <button class="icon-btn lightbox__nav lightbox__nav--next" type="button" aria-label="Next image" data-lightbox-next>{{ icon('chevron-right') }}</button>
+  </div>
+  <p class="lightbox__caption"><span data-lightbox-caption></span><small>Photo: BYD Auto (official)</small></p>
+</div>
+
+<script type="application/json" id="vehicle-data">{{ vehicle_json }}</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{# Reusable template macros #}
+
+{# Inline SVG icon from the sprite in /static/icons/sprite.svg #}
+{% macro icon(name, cls='', label=None) -%}
+<svg class="icon {{ cls }}" {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true" focusable="false"{% endif %}><use href="#i-{{ name }}"></use></svg>
+{%- endmacro %}
+
+{# Vehicle card used on Home (server-rendered). The showroom renders the same
+   markup client-side in static/js/pages/showroom.js -> cardTemplate(). #}
+{% macro vehicle_card(v, compare=False) -%}
+<article class="vehicle-card" data-reveal>
+  <div class="vehicle-card__media">
+    <img src="{{ v.card_image }}" alt="{{ v.full_name }} in {{ v.colours[0].name }}, studio photo" loading="lazy" decoding="async" width="1600" height="818">
+    <div class="vehicle-card__badges">
+      <span class="badge badge--dark">{{ v.status }}</span>
+      <span class="badge badge--red">{{ icon('tag') }}Save {{ v.preorder.discount|cad }}</span>
+    </div>
+  </div>
+  <div class="vehicle-card__body">
+    <div class="vehicle-card__title">
+      <div>
+        <h3><a href="{{ url_for('vehicle', vid=v.id) }}">{{ v.name }}</a></h3>
+        <p class="vehicle-card__tagline">{{ v.body }} &middot; {{ v.seats }} seats</p>
+      </div>
+      <div class="vehicle-card__price">
+        <span>From</span>
+        <strong>{{ v.price_from|cad }}</strong>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec"><span class="spec__label">{{ icon('route') }}Range</span><span class="spec__value">{{ v.range_max }}<small>km</small></span></div>
+      <div class="spec"><span class="spec__label">{{ icon('zap') }}Power</span><span class="spec__value">{{ v.power_max }}<small>hp</small></span></div>
+      <div class="spec"><span class="spec__label">{{ icon('timer') }}0–100</span><span class="spec__value">{{ v.accel_best }}<small>s</small></span></div>
+    </div>
+    <div class="vehicle-card__footer">
+      <div class="colour-dots" aria-label="{{ v.colours|length }} colours available">
+        {% for c in v.colours %}<span style="background:{{ c.hex }}" title="{{ c.name }}"></span>{% endfor %}
+      </div>
+      <span class="link-arrow">Configure {{ icon('arrow-right') }}</span>
+    </div>
+  </div>
+</article>
+{%- endmacro %}

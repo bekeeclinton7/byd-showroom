@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon %}
+{% block title %}Compare BYD models | BYD Canada{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a>{{ icon('chevron-right') }}<span aria-current="page">Compare</span>
+    </nav>
+    <h1 data-load>Compare models</h1>
+    <p class="lead" data-load>Put up to three BYD models side by side. The best figure in each row is highlighted.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="compare" data-compare>
+      <div class="compare__slots" data-compare-slots>
+        {% for n in range(3) %}
+        <div class="compare-slot" data-slot="{{ n }}">
+          <label class="visually-hidden" for="slot-{{ n }}">Model {{ n + 1 }}</label>
+          <select class="select" id="slot-{{ n }}" data-slot-select>
+            <option value="">Add a model…</option>
+            {% for v in all_vehicles %}<option value="{{ v.id }}">{{ v.full_name }}</option>{% endfor %}
+          </select>
+          <div class="compare-slot__card" data-slot-card>
+            <div class="compare-slot__empty">
+              <span class="empty__icon">{{ icon('plus', cls='icon--lg') }}</span>
+              <span class="subtle">Choose a model</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="compare__table-wrap" data-compare-table-wrap>
+        <table class="compare-table" data-compare-table>
+          <caption class="visually-hidden">Specification comparison</caption>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="subtle compare__note">{{ icon('info', cls='icon--sm inline-icon') }} Figures are for the highest-range or highest-performance trim of each model, as noted. Prices are estimated starting MSRPs.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

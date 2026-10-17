@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon %}
+{% block title %}Google Sheets logging | Admin | BYD Canada{% endblock %}
+{% block description %}Administrator status page for checkout logging.{% endblock %}
+{% block head %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">Admin</p>
+    <h1>Google Sheets logging</h1>
+    <p class="lead">Every completed checkout is queued here and delivered to your spreadsheet in the background. Customers always see their confirmation, even when Google is unreachable.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container admin">
+    {% if notice %}
+    <div class="notice {{ 'notice--success' if notice_ok else 'notice--danger' }}" role="status">
+      {{ icon('check-circle' if notice_ok else 'alert') }}<span>{{ notice }}</span>
+    </div>
+    {% endif %}
+
+    <div class="admin__grid">
+      <section class="card admin__card" aria-labelledby="conn-h">
+        <h2 id="conn-h" class="admin__h">{{ icon('plug') }} Connection</h2>
+        <dl class="admin__dl">
+          <div><dt>Backend</dt><dd>
+            {% if backend.configured %}<span class="badge badge--success">{{ icon('check') }} {{ backend.name }}</span>
+            {% elif backend.error %}<span class="badge badge--soft-red">{{ icon('alert') }} {{ backend.name }}</span>
+            {% else %}<span class="badge badge--outline">{{ backend.name }}</span>{% endif %}
+          </dd></div>
+          {% if backend.target %}<div><dt>Target</dt><dd class="admin__mono">{{ backend.target }}</dd></div>{% endif %}
+          {% if backend.error %}<div><dt>Problem</dt><dd>{{ backend.error }}</dd></div>{% endif %}
+        </dl>
+        {% if not backend.configured and not backend.error %}
+        <p class="subtle">Orders are being queued and will be delivered automatically once you add credentials to <code>.env</code> and restart the server. See <code>docs/google-sheets-setup.md</code>.</p>
+        {% endif %}
+        <form method="post" action="{{ url_for('admin_sheets_check') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn btn--outline btn--sm" type="submit">{{ icon('activity') }} Test connection</button>
+        </form>
+      </section>
+
+      <section class="card admin__card" aria-labelledby="queue-h">
+        <h2 id="queue-h" class="admin__h">{{ icon('layers') }} Queue</h2>
+        <div class="admin__stats">
+          <div><strong>{{ stats.sent }}</strong><span>Logged</span></div>
+          <div><strong>{{ stats.pending }}</strong><span>Waiting / retrying</span></div>
+          <div class="{{ 'is-bad' if stats.failed else '' }}"><strong>{{ stats.failed }}</strong><span>Gave up</span></div>
+        </div>
+        <form method="post" action="{{ url_for('admin_sheets_retry') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn btn--primary btn--sm" type="submit" {{ 'disabled' if not stats.failed }}>{{ icon('rotate') }} Retry failed orders</button>
+        </form>
+        <p class="subtle">Failed deliveries retry automatically after 30 s, 2 min, 10 min, 30 min, 1 h, 3 h, 6 h and 12 h, then stop until you retry them here.</p>
+      </section>
+    </div>
+
+    <section class="card admin__card" aria-labelledby="jobs-h">
+      <h2 id="jobs-h" class="admin__h">{{ icon('clock') }} Recent orders</h2>
+      {% if stats.jobs %}
+      <div class="admin__table-wrap" tabindex="0" role="region" aria-labelledby="jobs-h">
+        <table class="admin__table">
+          <thead><tr><th scope="col">Order</th><th scope="col">Placed</th><th scope="col">Status</th><th scope="col">Attempts</th><th scope="col">Details</th></tr></thead>
+          <tbody>
+          {% for j in stats.jobs %}
+            <tr>
+              <td class="admin__mono">{{ j.ref }}</td>
+              <td>{{ fmt_time(j.created) }}</td>
+              <td>
+                {% if j.status == 'sent' %}<span class="badge badge--success">Logged</span>
+                {% elif j.status == 'failed' %}<span class="badge badge--red">Gave up</span>
+                {% elif j.attempts %}<span class="badge badge--soft-red">Retrying</span>
+                {% else %}<span class="badge badge--outline">Queued</span>{% endif %}
+              </td>
+              <td>{{ j.attempts }}</td>
+              <td><div class="admin__detail">
+                {% if j.status == 'sent' %}{{ 'Already in sheet, skipped' if j.result == 'duplicate' else 'Written' }} {{ fmt_time(j.sent_at) }}
+                {% else %}{% if j.last_error %}<span class="admin__err">{{ j.last_error }}</span>{% endif %}
+                  {% if j.status == 'pending' and j.attempts %}<span class="subtle">Next try {{ fmt_time(j.next_attempt) }}</span>{% endif %}
+                {% endif %}
+              </div></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="subtle">No orders yet. Place a test pre-order and refresh this page.</p>
+      {% endif %}
+    </section>
+
+    <section class="card admin__card" aria-labelledby="cols-h">
+      <h2 id="cols-h" class="admin__h">{{ icon('grid') }} Spreadsheet columns</h2>
+      <p class="subtle">One row per vehicle. Order details repeat on each row so the sheet filters and sorts cleanly.</p>
+      <ol class="admin__cols">{% for h in headers %}<li>{{ h }}</li>{% endfor %}</ol>
+    </section>
+  </div>
+</section>
+{% endblock %}

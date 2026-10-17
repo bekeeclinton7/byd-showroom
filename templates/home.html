@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% from "macros.html" import icon, vehicle_card %}
+{% block title %}BYD Canada — Electric vehicles, now taking pre-orders{% endblock %}
+
+{% block content %}
+{# ---------------- Hero ---------------- #}
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__media">
+    <img src="/img/vehicles/sealion-7/charging/1.webp" alt="BYD Sealion 7 in Polar White charging in a modern timber garage at dusk" width="1600" height="900" fetchpriority="high">
+  </div>
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow eyebrow--light" data-load>{{ icon('sparkle', cls='icon--sm') }} BYD is coming to Canada</p>
+      <h1 id="hero-title" class="hero__title" data-load>Electric, engineered<br>for Canadian roads.</h1>
+      <p class="hero__lead" data-load>Seven Blade Battery EVs, from the city-sized Seagull to the seven-seat Tang. Configure yours today and lock in launch pricing with a fully refundable deposit from {{ deposit_from|cad }}.</p>
+      <div class="hero__actions" data-load>
+        <a class="btn btn--primary btn--lg" href="{{ url_for('showroom') }}">Explore the showroom {{ icon('arrow-right', cls='icon-arrow') }}</a>
+        <a class="btn btn--light btn--lg" href="#how-it-works">How pre-orders work</a>
+      </div>
+      <div class="hero__countdown" data-load>
+        <span class="hero__countdown-label">{{ icon('clock', cls='icon--sm') }} Launch pricing ends in</span>
+        <div class="countdown countdown--dark" data-countdown="{{ launch_deadline }}" role="timer" aria-label="Time left for launch pricing"></div>
+      </div>
+    </div>
+  </div>
+  <div class="hero__stats">
+    <div class="container hero__stats-grid">
+      <div class="hero__stat" data-load><strong>570<small>km</small></strong><span>Max WLTP range (Seal)</span></div>
+      <div class="hero__stat" data-load><strong>3.8<small>s</small></strong><span>0–100 km/h (Seal AWD)</span></div>
+      <div class="hero__stat" data-load><strong>8<small>yr</small></strong><span>160,000 km battery warranty</span></div>
+      <div class="hero__stat" data-load><strong>$24,990</strong><span>Starting estimated MSRP</span></div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- Featured lineup ---------------- #}
+<section class="section" aria-labelledby="lineup-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="eyebrow">Launch lineup</p>
+        <h2 id="lineup-title">Four ways to go electric</h2>
+      </div>
+      <p>The first BYD models arriving at Canadian retailers in late 2026. Every pre-order includes an exclusive launch discount.</p>
+    </div>
+    <div class="grid grid-4 lineup-grid" data-stagger>
+      {% for v in featured %}{{ vehicle_card(v) }}{% endfor %}
+    </div>
+    <div class="center-cta" data-reveal>
+      <a class="btn btn--outline" href="{{ url_for('showroom') }}">See all {{ all_vehicles|length }} models {{ icon('arrow-right', cls='icon-arrow') }}</a>
+    </div>
+  </div>
+</section>
+
+{# ---------------- Why BYD ---------------- #}
+<section class="section section--soft" id="why-byd" aria-labelledby="why-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="eyebrow">Why BYD</p>
+        <h2 id="why-title">Built around the Blade Battery</h2>
+      </div>
+      <p>The world's largest EV maker designs its own cells, motors and chips, so every part of the powertrain is engineered to work together.</p>
+    </div>
+    <div class="grid grid-4" data-stagger>
+      <article class="feature-card" data-reveal>
+        <span class="feature-card__icon">{{ icon('shield', cls='icon--lg') }}</span>
+        <h3>Blade Battery safety</h3>
+        <p>LFP cells that passed the nail-penetration test without fire or smoke, structurally integrated for rigidity.</p>
+      </article>
+      <article class="feature-card" data-reveal>
+        <span class="feature-card__icon">{{ icon('route', cls='icon--lg') }}</span>
+        <span class="feature-card__stat">570 km</span>
+        <h3>Range for real trips</h3>
+        <p>Up to 570 km WLTP, with heat pump technology that helps protect range through Canadian winters.</p>
+      </article>
+      <article class="feature-card" data-reveal>
+        <span class="feature-card__icon">{{ icon('zap', cls='icon--lg') }}</span>
+        <span class="feature-card__stat">230 kW</span>
+        <h3>Fast charging</h3>
+        <p>Peak DC charging up to 230 kW, with 11 kW home charging and Vehicle-to-Load on most models.</p>
+      </article>
+      <article class="feature-card" data-reveal>
+        <span class="feature-card__icon">{{ icon('award', cls='icon--lg') }}</span>
+        <span class="feature-card__stat">8 yr</span>
+        <h3>Long-term confidence</h3>
+        <p>8-year / 160,000 km battery warranty, plus over-the-air software updates that improve the car over time.</p>
+      </article>
+    </div>
+
+    <div class="split" data-reveal>
+      <div class="split__media">
+        <img src="/img/vehicles/sealion-7/tech/1.webp" alt="Exploded view of the BYD Blade Battery pack integrated into the floor structure" loading="lazy" width="1600" height="900">
+      </div>
+      <div class="split__copy">
+        <p class="eyebrow">Cell-to-Body technology</p>
+        <h3 class="split__title">The battery is the floor.</h3>
+        <p class="muted">BYD integrates long, thin Blade cells directly into the body structure. The car gets stiffer, the floor gets lower and there's more room inside, without adding weight.</p>
+        <ul class="tick-list">
+          <li>{{ icon('check', cls='icon--sm') }} Lithium iron phosphate (LFP): no cobalt, long cycle life</li>
+          <li>{{ icon('check', cls='icon--sm') }} Thermal management tuned for −30 °C winters</li>
+          <li>{{ icon('check', cls='icon--sm') }} Charge to 100% daily without accelerated wear</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- Spotlight ---------------- #}
+<section class="section" aria-labelledby="spotlight-title">
+  <div class="container">
+    <div class="spotlight" data-reveal>
+      <div class="spotlight__media">
+        <img src="/img/vehicles/seal/ruby-red/1.webp" alt="BYD Seal in Ruby Red, front three-quarter studio photo" loading="lazy" width="1600" height="818">
+      </div>
+      <div class="spotlight__copy">
+        <span class="badge badge--soft-red">{{ icon('award') }} Flagship of the launch</span>
+        <h2 id="spotlight-title">BYD Seal</h2>
+        <p class="muted">A sports sedan with Cell-to-Body construction, 0.219 drag coefficient and up to 530 hp. Pre-order now and save $2,500 off the estimated MSRP.</p>
+        <div class="spec-row spec-row--lg">
+          <div class="spec"><span class="spec__label">{{ icon('route') }}Range</span><span class="spec__value">570<small>km</small></span></div>
+          <div class="spec"><span class="spec__label">{{ icon('timer') }}0–100</span><span class="spec__value">3.8<small>s</small></span></div>
+          <div class="spec"><span class="spec__label">{{ icon('zap') }}DC peak</span><span class="spec__value">150<small>kW</small></span></div>
+        </div>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="{{ url_for('vehicle', vid='seal') }}">Configure your Seal {{ icon('arrow-right', cls='icon-arrow') }}</a>
+          <a class="btn btn--outline" href="{{ url_for('compare') }}?ids=seal,sealion-7,han">Compare {{ icon('compare') }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- How it works ---------------- #}
+<section class="section section--soft" id="how-it-works" aria-labelledby="how-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="eyebrow">Pre-order in three steps</p>
+        <h2 id="how-title">Reserve today. Decide later.</h2>
+      </div>
+      <p>Your deposit holds your place in the delivery queue and locks in launch pricing. Change your mind any time before delivery and get it back in full.</p>
+    </div>
+    <ol class="steps" data-stagger>
+      <li class="step" data-reveal>
+        <span class="step__num">01</span>
+        <span class="feature-card__icon">{{ icon('palette', cls='icon--lg') }}</span>
+        <h3>Configure</h3>
+        <p>Choose your model, trim, paint and interior, with live pricing as you build.</p>
+      </li>
+      <li class="step" data-reveal>
+        <span class="step__num">02</span>
+        <span class="feature-card__icon">{{ icon('lock', cls='icon--lg') }}</span>
+        <h3>Reserve from {{ deposit_from|cad }}</h3>
+        <p>Place a fully refundable deposit and lock in your pre-order discount.</p>
+      </li>
+      <li class="step" data-reveal>
+        <span class="step__num">03</span>
+        <span class="feature-card__icon">{{ icon('store', cls='icon--lg') }}</span>
+        <h3>Finalize &amp; drive</h3>
+        <p>We'll contact you before delivery to confirm financing, trade-in and pickup.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+{# ---------------- FAQ ---------------- #}
+<section class="section" id="faq" aria-labelledby="faq-title">
+  <div class="container faq">
+    <div data-reveal>
+      <p class="eyebrow">Questions</p>
+      <h2 id="faq-title">Pre-order FAQ</h2>
+      <p class="muted">Everything you need to know before reserving.</p>
+    </div>
+    <div class="faq__list" data-reveal>
+      <details class="faq__item">
+        <summary>Is the {{ deposit_from|cad }} deposit really refundable? {{ icon('plus') }}</summary>
+        <p>Yes. You can cancel at any point before signing your final purchase agreement and receive the full deposit back to your original payment method.</p>
+      </details>
+      <details class="faq__item">
+        <summary>How does the pre-order discount work? {{ icon('plus') }}</summary>
+        <p>Each model carries a launch discount off the estimated MSRP, from $1,000 on the Seagull to $3,500 on the Han. It is locked in when you reserve before the launch deadline.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Are BYD vehicles eligible for federal EV rebates? {{ icon('plus') }}</summary>
+        <p>Under current rules, China-built vehicles are not eligible for the federal EV incentive. Some provincial programs may apply; your retailer will confirm eligibility at delivery.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Are prices final? {{ icon('plus') }}</summary>
+        <p>Prices shown are estimated MSRPs in CAD and exclude freight, PDI, licensing and fees. Taxes shown at checkout are estimates based on your province.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Where will I pick up my vehicle? {{ icon('plus') }}</summary>
+        <p>Initial retail locations are planned for Toronto, Vancouver, Montréal and Calgary. Home delivery is available in every province and territory.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+{# ---------------- CTA band ---------------- #}
+<section class="cta-band" aria-labelledby="cta-title">
+  <div class="container cta-band__inner" data-reveal>
+    <div>
+      <h2 id="cta-title">Lock in launch pricing.</h2>
+      <p>Reserve any BYD model with a fully refundable deposit from {{ deposit_from|cad }}.</p>
+    </div>
+    <div class="cta-band__actions">
+      <div class="countdown countdown--dark" data-countdown="{{ launch_deadline }}" role="timer" aria-label="Time left for launch pricing"></div>
+      <a class="btn btn--primary btn--lg" href="{{ url_for('showroom') }}">Start your pre-order {{ icon('arrow-right', cls='icon-arrow') }}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
